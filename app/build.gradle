@@ -3,6 +3,16 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.devtools.ksp'
 
+// Release signing credentials are read from a gitignored keystore.properties
+// at the repo root, so secrets stay out of version control.
+def keystorePropsFile = rootProject.file("keystore.properties")
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    // Read as UTF-8 (default .properties encoding is ISO-8859-1, which would
+    // mangle non-ASCII paths such as the keystore's Chinese folder name).
+    keystorePropsFile.withReader('UTF-8') { keystoreProps.load(it) }
+}
+
 android {
     lint {
         abortOnError false
@@ -17,7 +27,7 @@ android {
                 onesignal_app_id               : OneSignal.appId,
                 onesignal_google_project_number: OneSignal.googleProjectNumber
         ]
-        applicationId MyApp.appId
+        applicationId MyApp.applicationId
         minSdkVersion Versions.minSdk
         compileSdk Versions.targetSdk
         targetSdkVersion Versions.targetSdk
@@ -35,6 +45,17 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            if (keystorePropsFile.exists()) {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         buildTypes.each {
             it.buildConfigField("String", "ONESIGNAL_APP_ID", "\"$OneSignal.appId\"")
@@ -46,6 +67,9 @@ android {
             shrinkResources false
             proguardFiles 'proguard-android-optimize.txt', 'proguard-rules.pro'
             consumerProguardFiles 'proguard-android-optimize.txt', 'proguard-rules.pro'
+            if (keystorePropsFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 

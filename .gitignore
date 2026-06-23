@@ -94,3 +94,8 @@ app/release
 
 # upstream CI workflow excluded (token lacks workflow scope); kept locally as reference
 .github/workflows/
+
+# signing secrets (local only)
+keystore.properties
+*.jks
+*.keystore
