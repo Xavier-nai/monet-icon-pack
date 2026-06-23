@@ -68,9 +68,6 @@ fun LiquidBottomTabs(
     content: @Composable RowScope.(hiddenIndex: Int?, selectedContentIndex: Int?) -> Unit
 ) {
     val isLightTheme = !isSystemInDarkTheme()
-    val accentColor =
-        if (isLightTheme) Color(0xFF3881FA)
-        else Color(0xFF3881FA)
     val containerColor =
         if (isLightTheme) Color.White.copy(0.82f)
         else Color(0xFF121212).copy(0.68f)
@@ -124,6 +121,15 @@ fun LiquidBottomTabs(
                             spring(1f, 300f, 0.5f)
                         )
                     }
+                },
+                onPress = { position, size ->
+                    val slotWidth = size.width / tabsCount
+                    val pressedIndex = (
+                        if (isLtr) position.x / slotWidth
+                        else (size.width - position.x) / slotWidth
+                    ).toInt().fastCoerceIn(0, tabsCount - 1)
+                    currentIndex = pressedIndex
+                    updateValue(pressedIndex.toFloat())
                 },
                 onDrag = { _, dragAmount ->
                     onInteraction()
@@ -236,12 +242,11 @@ fun LiquidBottomTabs(
                     .then(interactiveHighlight.modifier)
                     .height(56f.dp)
                     .fillMaxWidth()
-                    .padding(horizontal = 4f.dp)
-                    .tintLayer(accentColor),
+                    .padding(horizontal = 4f.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                content(null, null)
-            }
+            content(null, null)
+        }
         }
 
         Box(
@@ -252,8 +257,6 @@ fun LiquidBottomTabs(
                         if (isLtr) dampedDragAnimation.value * tabWidth + panelOffset
                         else size.width - (dampedDragAnimation.value + 1f) * tabWidth + panelOffset
                 }
-                .then(interactiveHighlight.gestureModifier)
-                .then(dampedDragAnimation.modifier)
                 .drawBackdrop(
                     backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                     shape = { Capsule() },
@@ -309,6 +312,8 @@ fun LiquidBottomTabs(
                 }
                 .height(64f.dp)
                 .fillMaxWidth()
+                .then(interactiveHighlight.gestureModifier)
+                .then(dampedDragAnimation.modifier)
                 .padding(4f.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {

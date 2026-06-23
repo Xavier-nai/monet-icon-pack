@@ -28,6 +28,7 @@ class DampedDragAnimation(
     val pressedScale: Float,
     val onDragStarted: DampedDragAnimation.(position: Offset) -> Unit,
     val onDragStopped: DampedDragAnimation.() -> Unit,
+    val onPress: DampedDragAnimation.(position: Offset, size: IntSize) -> Unit = { _, _ -> },
     val onDrag: DampedDragAnimation.(size: IntSize, dragAmount: Offset) -> Unit,
 ) {
 
@@ -69,6 +70,7 @@ class DampedDragAnimation(
         inspectDragGestures(
             onDragStart = { down ->
                 onDragStarted(down.position)
+                onPress(down.position, size)
                 press()
             },
             onDragEnd = {
