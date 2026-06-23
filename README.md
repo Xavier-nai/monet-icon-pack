@@ -23,30 +23,6 @@ The LiquidGlass bottom bar was compiled by MonetCarlos for this software
 <img src="https://github.com/monetcarlos2026/monet-icon-pack/blob/main/monet/4.jpg?maxAge=0" height="350"/>
 </p>
 
-### Home / Icons / Apply / Requests
-<p align="center">
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/1.png?maxAge=0" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/2.png?maxAge=0" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/3.png?maxAge=0" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/4.png?maxAge=0" height="350"/>
-</p>
-
-### Wallpapers support (Based on [Frames](https://github.com/jahirfiquitiva/Frames)) / Templates support (Based on [Kuper](https://github.com/Kuper))
-<p align="center">
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/3.png?maxAge=0" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Kuper/raw/master/art/4.png" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Kuper/raw/master/art/5.png" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/6.png?maxAge=0" height="350"/>
-</p>
-
-### Help / Credits / Settings / Navigation Drawer
-<p align="center">
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/7.png?maxAge=0" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/8.png?maxAge=0" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/9.png?maxAge=0" height="350"/>
-<img src="https://github.com/jahirfiquitiva/Blueprint/raw/master/art/10.png?maxAge=0" height="350"/>
-</p>
-
 ---
 
 # Features:
@@ -74,18 +50,6 @@ The LiquidGlass bottom bar was compiled by MonetCarlos for this software
 
 ## Changelog
 :radio_button: You can find it in the [Releases page](https://github.com/monetcarlos2026/monet-icon-pack/releases)
-
----
-
-<a target="_blank" href="https://pacificmanager.app">
-<img src="https://pacificmanager.app/content/promo-banner-smaller.png" width="400"/>
-</a>
-
-<a href="https://pacificmanager.app" target="_blank">Pacific Manager</a> takes care of all your icon requests. Quit using the old traditional method of receiving emails from your users, making you sort through hundreds of potentially duplicate requests a day. </i>
-
-<b>Use the code `Monet Icon Pack` at checkout to get 2 weeks of Pacific Manager for free.</b>
-
----
 
 # Including in your project
 Blueprint is available via Maven, so getting it as simple as adding it as a dependency, like this:
