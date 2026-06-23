@@ -119,8 +119,8 @@ fun LiquidGlassBottomBar(
                 val tabColor = if (selectedContent) selectedContentColor else contentColor
                 LiquidBottomTab(
                     onClick = { onSelect(tab.menuId) },
-                    visible = if (selectedContentIndex == null) hiddenIndex != index else selectedContent,
-                    enabled = selectedContentIndex == null
+                    visible = selectedContentIndex != null || hiddenIndex != index,
+                    enabled = selectedContentIndex != null
                 ) {
                     androidx.compose.foundation.Image(
                         painter = painterResource(tab.iconRes),

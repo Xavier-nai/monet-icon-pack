@@ -200,9 +200,7 @@ fun LiquidBottomTabs(
                 .fillMaxWidth()
                 .padding(4f.dp),
             verticalAlignment = Alignment.CenterVertically,
-        ) {
-            content(visualIndex, null)
-        }
+        ) {}
 
         CompositionLocalProvider(
             LocalLiquidBottomTabScale provides {
@@ -304,24 +302,18 @@ fun LiquidBottomTabs(
                 .fillMaxWidth(1f / tabsCount)
         )
 
-        CompositionLocalProvider(
-            LocalLiquidBottomTabScale provides {
-                lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
-            }
+        Row(
+            Modifier
+                .graphicsLayer {
+                    translationX = panelOffset
+                }
+                .height(64f.dp)
+                .fillMaxWidth()
+                .padding(4f.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                Modifier
-                    .clearAndSetSemantics {}
-                    .graphicsLayer {
-                        translationX = panelOffset
-                    }
-                    .height(64f.dp)
-                    .fillMaxWidth()
-                    .padding(4f.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                content(null, visualIndex)
-            }
+            content(null, visualIndex)
         }
+
     }
 }

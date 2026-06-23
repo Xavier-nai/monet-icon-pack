@@ -84,11 +84,13 @@ class MainActivity : BottomNavigationBlueprintActivity() {
 
     private var lastCaptureAt = 0L
     private val trailingCapture = Runnable { captureBackdrop() }
+    private val chromeSync = Runnable { syncStatusBarWithToolbar() }
 
     // Live refraction: re-snapshot the (down-scaled) content behind the bar as the page
     // scrolls, throttled to ~20fps. Cheap now that the snapshot is rendered at 0.34x.
     private val scrollListener = ViewTreeObserver.OnScrollChangedListener {
         val now = SystemClock.uptimeMillis()
+        syncStatusBarWithToolbar()
         if (now - lastCaptureAt >= 48L) {
             lastCaptureAt = now
             captureBackdrop()
@@ -104,7 +106,7 @@ class MainActivity : BottomNavigationBlueprintActivity() {
         super.onCreate(savedInstanceState)
         syncStatusBarWithToolbar()
         installLiquidGlass()
-        window.decorView.post { syncStatusBarWithToolbar() }
+        scheduleChromeSync()
     }
 
     private fun syncStatusBarWithToolbar() {
@@ -130,6 +132,13 @@ class MainActivity : BottomNavigationBlueprintActivity() {
             window.isStatusBarContrastEnforced = false
         }
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDark
+    }
+
+    private fun scheduleChromeSync() {
+        handler.removeCallbacks(chromeSync)
+        for (delay in longArrayOf(0L, 16L, 80L, 180L, 360L)) {
+            handler.postDelayed(chromeSync, delay)
+        }
     }
 
     private fun installOrUpdateStatusBarScrim(color: Int) {
@@ -273,14 +282,18 @@ class MainActivity : BottomNavigationBlueprintActivity() {
 
     override fun onResume() {
         super.onResume()
-        syncStatusBarWithToolbar()
-        window.decorView.post { syncStatusBarWithToolbar() }
+        scheduleChromeSync()
         // Keep the stock bar hidden and the selection mirror in sync.
         bottomNav?.let {
             it.visibility = View.INVISIBLE
             selectedId.intValue = it.selectedItemId
         }
         handler.post { captureBackdrop() }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) scheduleChromeSync()
     }
 
     override fun onDestroy() {
