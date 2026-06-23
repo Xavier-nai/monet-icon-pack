@@ -26,6 +26,7 @@ fun RowScope.LiquidBottomTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
+    enabled: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val scale = LocalLiquidBottomTabScale.current
@@ -35,6 +36,7 @@ fun RowScope.LiquidBottomTab(
             .clickable(
                 interactionSource = null,
                 indication = null,
+                enabled = enabled,
                 role = Role.Tab,
                 onClick = onClick
             )

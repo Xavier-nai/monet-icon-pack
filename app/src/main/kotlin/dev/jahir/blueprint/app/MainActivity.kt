@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.RecyclerView
@@ -78,6 +79,7 @@ class MainActivity : BottomNavigationBlueprintActivity() {
     private var rootView: ViewGroup? = null
     private var bottomNav: BottomNavigationView? = null
     private var fragmentsContainer: View? = null
+    private var statusBarScrim: View? = null
     private var glassInstalled = false
 
     private var lastCaptureAt = 0L
@@ -109,11 +111,51 @@ class MainActivity : BottomNavigationBlueprintActivity() {
         val isDark = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
             android.content.res.Configuration.UI_MODE_NIGHT_YES
-        window.statusBarColor = ContextCompat.getColor(
+        val toolbarColor = ContextCompat.getColor(
             this,
             if (isDark) R.color.darkThemePrimary else R.color.primary
         )
+        val rootColor = ContextCompat.getColor(
+            this,
+            if (isDark) R.color.darkThemeBackground else R.color.background
+        )
+        findViewById<View>(resId("activity_root_view", "id"))?.setBackgroundColor(rootColor)
+        findViewById<View>(resId("toolbar", "id"))?.let { toolbar ->
+            toolbar.setBackgroundColor(toolbarColor)
+            (toolbar.parent as? View)?.setBackgroundColor(toolbarColor)
+        }
+        installOrUpdateStatusBarScrim(toolbarColor)
+        window.statusBarColor = toolbarColor
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isStatusBarContrastEnforced = false
+        }
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDark
+    }
+
+    private fun installOrUpdateStatusBarScrim(color: Int) {
+        val root = findViewById<View>(resId("activity_root_view", "id")) as? ViewGroup ?: return
+        val scrim = statusBarScrim ?: View(this).also { view ->
+            statusBarScrim = view
+            root.addView(
+                view,
+                CoordinatorLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    statusBarHeight()
+                ).apply { gravity = Gravity.TOP }
+            )
+        }
+        scrim.setBackgroundColor(color)
+        scrim.bringToFront()
+    }
+
+    private fun statusBarHeight(): Int {
+        window.decorView.rootWindowInsets?.let { rootInsets ->
+            val insets = WindowInsetsCompat.toWindowInsetsCompat(rootInsets)
+                .getInsets(WindowInsetsCompat.Type.statusBars())
+            if (insets.top > 0) return insets.top
+        }
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else 0
     }
 
     private fun installLiquidGlass() {

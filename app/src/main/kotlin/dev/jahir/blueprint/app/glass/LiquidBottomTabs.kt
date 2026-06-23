@@ -65,7 +65,7 @@ fun LiquidBottomTabs(
     tabsCount: Int,
     modifier: Modifier = Modifier,
     onInteraction: () -> Unit = {},
-    content: @Composable RowScope.(hiddenIndex: Int?) -> Unit
+    content: @Composable RowScope.(hiddenIndex: Int?, selectedContentIndex: Int?) -> Unit
 ) {
     val isLightTheme = !isSystemInDarkTheme()
     val accentColor =
@@ -201,7 +201,7 @@ fun LiquidBottomTabs(
                 .padding(4f.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            content(visualIndex)
+            content(visualIndex, null)
         }
 
         CompositionLocalProvider(
@@ -242,7 +242,7 @@ fun LiquidBottomTabs(
                     .tintLayer(accentColor),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                content(null)
+                content(null, null)
             }
         }
 
@@ -303,5 +303,25 @@ fun LiquidBottomTabs(
                 .height(56f.dp)
                 .fillMaxWidth(1f / tabsCount)
         )
+
+        CompositionLocalProvider(
+            LocalLiquidBottomTabScale provides {
+                lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
+            }
+        ) {
+            Row(
+                Modifier
+                    .clearAndSetSemantics {}
+                    .graphicsLayer {
+                        translationX = panelOffset
+                    }
+                    .height(64f.dp)
+                    .fillMaxWidth()
+                    .padding(4f.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                content(null, visualIndex)
+            }
+        }
     }
 }

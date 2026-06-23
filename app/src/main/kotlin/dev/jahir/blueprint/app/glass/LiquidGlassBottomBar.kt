@@ -57,6 +57,7 @@ fun LiquidGlassBottomBar(
     }
     val dark = isSystemInDarkTheme()
     val contentColor = if (dark) Color.White else Color.Black
+    val selectedContentColor = Color(0xFF3881FA)
 
     var barPos by remember { mutableStateOf(Offset.Zero) }
 
@@ -112,21 +113,24 @@ fun LiquidGlassBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { barPos = it.positionInWindow() }
-        ) { hiddenIndex ->
+        ) { hiddenIndex, selectedContentIndex ->
             tabs.forEachIndexed { index, tab ->
+                val selectedContent = selectedContentIndex == index
+                val tabColor = if (selectedContent) selectedContentColor else contentColor
                 LiquidBottomTab(
                     onClick = { onSelect(tab.menuId) },
-                    visible = hiddenIndex != index
+                    visible = if (selectedContentIndex == null) hiddenIndex != index else selectedContent,
+                    enabled = selectedContentIndex == null
                 ) {
                     androidx.compose.foundation.Image(
                         painter = painterResource(tab.iconRes),
                         contentDescription = tab.label,
-                        colorFilter = ColorFilter.tint(contentColor),
+                        colorFilter = ColorFilter.tint(tabColor),
                         modifier = Modifier.size(24.dp)
                     )
                     BasicText(
                         text = tab.label,
-                        style = TextStyle(color = contentColor, fontSize = 10.sp, textAlign = TextAlign.Center),
+                        style = TextStyle(color = tabColor, fontSize = 10.sp, textAlign = TextAlign.Center),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
