@@ -81,6 +81,7 @@ where `{latest version}` corresponds to published version in   [![GitHub Release
 
 ## Special thanks 🙌
 - [MonetCarlos](https://github.com/monetcarlos2026/) 🎨 💻
+- [Kyrant0](https://github.com/Kyant0/AndroidLiquidGlass/) 💻
 - [Eduardo Pratti](https://pratti.design/) 🎨
 - [Sherry Sabatine](https://www.photography-by-sherry.com/) 💵
 - [Allan Wang](https://www.allanwang.ca/) 💻
