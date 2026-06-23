@@ -26,9 +26,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.backdrops.rememberCanvasBackdrop
+import kotlin.math.roundToInt
 
 /** One tab, mapped 1:1 to a Blueprint bottom-navigation menu item id. */
 data class GlassTab(val menuId: Int, val iconRes: Int, val label: String)
@@ -72,9 +75,22 @@ fun LiquidGlassBottomBar(
 
     val backdrop = rememberCanvasBackdrop {
         val img = backdropState.image
-        if (img != null) {
+        val fw = backdropState.fullWidth
+        val fh = backdropState.fullHeight
+        if (img != null && fw > 0 && fh > 0) {
             val tl = backdropState.contentTopLeftInWindow
-            drawImage(img, topLeft = Offset(tl.x - barPos.x, tl.y - barPos.y))
+            // Stretch the down-scaled snapshot back to 1:1 window space, offset so the
+            // slice directly behind the bar lands under it.
+            drawImage(
+                image = img,
+                srcOffset = IntOffset.Zero,
+                srcSize = IntSize(img.width, img.height),
+                dstOffset = IntOffset(
+                    (tl.x - barPos.x).roundToInt(),
+                    (tl.y - barPos.y).roundToInt()
+                ),
+                dstSize = IntSize(fw, fh)
+            )
         } else {
             drawRect(if (dark) Color(0xFF202124) else Color(0xFFF2F2F2))
         }

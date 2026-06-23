@@ -71,10 +71,10 @@ fun LiquidBottomTabs(
         if (isLightTheme) Color(0xFF0088FF)
         else Color(0xFF0091FF)
     // More opaque than the original catalog (0.4) so the bar reads as a clean frosted
-    // capsule over plain page content instead of letting the text bleed through.
+    // capsule over busy page content instead of letting icons/text bleed through.
     val containerColor =
-        if (isLightTheme) Color(0xFFFFFFFF).copy(0.7f)
-        else Color(0xFF1C1C1E).copy(0.62f)
+        if (isLightTheme) Color(0xFFFFFFFF).copy(0.82f)
+        else Color(0xFF1C1C1E).copy(0.72f)
 
     val tabsBackdrop = rememberLayerBackdrop()
 

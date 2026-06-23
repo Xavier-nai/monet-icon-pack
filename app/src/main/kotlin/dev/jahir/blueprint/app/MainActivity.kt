@@ -4,10 +4,15 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.widget.ScrollView
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.core.widget.NestedScrollView
+import androidx.recyclerview.widget.RecyclerView
 import androidx.compose.ui.platform.ComposeView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.github.javiersantos.piracychecker.PiracyChecker
@@ -72,6 +77,21 @@ class MainActivity : BottomNavigationBlueprintActivity() {
     private var fragmentsContainer: View? = null
     private var glassInstalled = false
 
+    private var lastCaptureAt = 0L
+    private val trailingCapture = Runnable { captureBackdrop() }
+
+    // Live refraction: re-snapshot the (down-scaled) content behind the bar as the page
+    // scrolls, throttled to ~20fps. Cheap now that the snapshot is rendered at 0.34x.
+    private val scrollListener = ViewTreeObserver.OnScrollChangedListener {
+        val now = SystemClock.uptimeMillis()
+        if (now - lastCaptureAt >= 48L) {
+            lastCaptureAt = now
+            captureBackdrop()
+        }
+        handler.removeCallbacks(trailingCapture)
+        handler.postDelayed(trailingCapture, 90L)
+    }
+
     private fun resId(name: String, type: String): Int =
         resources.getIdentifier(name, type, packageName)
 
@@ -128,9 +148,7 @@ class MainActivity : BottomNavigationBlueprintActivity() {
         }
         root.addView(composeView)
 
-        // Snapshot the content behind the bar once it's laid out. We deliberately do
-        // NOT re-capture on every scroll frame (that software-rendered the whole page
-        // each frame and caused the jank); we refresh only on navigation / resume.
+        root.viewTreeObserver.addOnScrollChangedListener(scrollListener)
         scheduleCaptures()
     }
 
@@ -150,9 +168,32 @@ class MainActivity : BottomNavigationBlueprintActivity() {
 
     private fun scheduleCaptures() {
         captureBackdrop()
+        applyContentInset()
         for (delay in longArrayOf(120L, 320L, 600L)) {
-            handler.postDelayed({ captureBackdrop() }, delay)
+            handler.postDelayed({
+                applyContentInset()
+                captureBackdrop()
+            }, delay)
         }
+    }
+
+    /**
+     * Give the scrolling content a bottom inset the height of the floating bar so the
+     * list doesn't scroll under/around the capsule (Blueprint only reserves room for the
+     * original full-width nav bar, which is shorter than our floating glass bar).
+     */
+    private fun applyContentInset() {
+        val container = fragmentsContainer as? ViewGroup ?: return
+        val inset = (resources.displayMetrics.density * 104f).toInt()
+        fun walk(v: View) {
+            val scrollable = v is RecyclerView || v is ScrollView || v is NestedScrollView
+            if (scrollable && v.paddingBottom < inset) {
+                (v as ViewGroup).clipToPadding = false
+                v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, inset)
+            }
+            if (v is ViewGroup) for (i in 0 until v.childCount) walk(v.getChildAt(i))
+        }
+        walk(container)
     }
 
     override fun onResume() {
@@ -162,10 +203,14 @@ class MainActivity : BottomNavigationBlueprintActivity() {
             it.visibility = View.INVISIBLE
             selectedId.intValue = it.selectedItemId
         }
-        handler.post { captureBackdrop() }
+        handler.post {
+            applyContentInset()
+            captureBackdrop()
+        }
     }
 
     override fun onDestroy() {
+        rootView?.viewTreeObserver?.removeOnScrollChangedListener(scrollListener)
         handler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
