@@ -21,9 +21,9 @@ import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.RecyclerView
 import com.github.javiersantos.piracychecker.PiracyChecker
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import dev.jahir.blueprint.app.ui.components.LiquidGlassBackdropState
-import dev.jahir.blueprint.app.ui.components.LiquidGlassBottomBar
-import dev.jahir.blueprint.app.ui.components.LiquidGlassTab
+import dev.jahir.blueprint.app.ui.liquidglass.LiquidGlassBackdropState
+import dev.jahir.blueprint.app.ui.liquidglass.LiquidGlassBottomBar
+import dev.jahir.blueprint.app.ui.liquidglass.LiquidGlassTab
 import dev.jahir.blueprint.ui.activities.BottomNavigationBlueprintActivity
 
 /**
