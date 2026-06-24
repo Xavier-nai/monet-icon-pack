@@ -21,9 +21,9 @@ import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.RecyclerView
 import com.github.javiersantos.piracychecker.PiracyChecker
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import dev.jahir.blueprint.app.glass.GlassBackdropState
-import dev.jahir.blueprint.app.glass.GlassTab
-import dev.jahir.blueprint.app.glass.LiquidGlassBottomBar
+import dev.jahir.blueprint.app.ui.components.LiquidGlassBackdropState
+import dev.jahir.blueprint.app.ui.components.LiquidGlassBottomBar
+import dev.jahir.blueprint.app.ui.components.LiquidGlassTab
 import dev.jahir.blueprint.ui.activities.BottomNavigationBlueprintActivity
 
 /**
@@ -68,11 +68,7 @@ class MainActivity : BottomNavigationBlueprintActivity() {
     override fun defaultMaterialYouTheme(): Int = R.style.MyApp_Default_MaterialYou
     override fun amoledMaterialYouTheme(): Int = R.style.MyApp_Default_Amoled_MaterialYou
 
-    // ---------------------------------------------------------------------------------------------
-    // Liquid Glass bottom bar (status bar is left to Blueprint's adaptive theming)
-    // ---------------------------------------------------------------------------------------------
-
-    private val backdropState = GlassBackdropState()
+    private val backdropState = LiquidGlassBackdropState()
     private val selectedId = mutableIntStateOf(-1)
     private val handler = Handler(Looper.getMainLooper())
 
@@ -80,7 +76,7 @@ class MainActivity : BottomNavigationBlueprintActivity() {
     private var bottomNav: BottomNavigationView? = null
     private var fragmentsContainer: View? = null
     private var statusBarScrim: View? = null
-    private var glassInstalled = false
+    private var liquidTabsInstalled = false
 
     private var lastCaptureAt = 0L
     private val trailingCapture = Runnable { captureBackdrop() }
@@ -105,7 +101,7 @@ class MainActivity : BottomNavigationBlueprintActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         syncStatusBarWithToolbar()
-        installLiquidGlass()
+        installLiquidTabs()
         scheduleChromeSync()
     }
 
@@ -128,8 +124,10 @@ class MainActivity : BottomNavigationBlueprintActivity() {
         }
         installOrUpdateStatusBarScrim(toolbarColor)
         window.statusBarColor = toolbarColor
+        window.navigationBarColor = rootColor
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isStatusBarContrastEnforced = false
+            window.isNavigationBarContrastEnforced = false
         }
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDark
     }
@@ -167,21 +165,19 @@ class MainActivity : BottomNavigationBlueprintActivity() {
         return if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else 0
     }
 
-    private fun installLiquidGlass() {
-        if (glassInstalled) return
+    private fun installLiquidTabs() {
+        if (liquidTabsInstalled) return
         val root = findViewById<View>(resId("activity_root_view", "id")) as? ViewGroup ?: return
         val nav = findViewById<View>(resId("bottom_navigation", "id")) as? BottomNavigationView ?: return
         val container = findViewById<View>(resId("fragments_container", "id")) ?: return
         rootView = root
         bottomNav = nav
         fragmentsContainer = container
-        glassInstalled = true
+        liquidTabsInstalled = true
 
-        // Hide the stock bar but keep it functional: selecting an item still drives navigation.
-        nav.visibility = View.INVISIBLE
+        nav.visibility = View.GONE
         selectedId.intValue = nav.selectedItemId
 
-        // Build tabs from the *actual* visible menu items Blueprint configured.
         val tabs = buildList {
             val menu = nav.menu
             for (i in 0 until menu.size()) {
@@ -190,8 +186,8 @@ class MainActivity : BottomNavigationBlueprintActivity() {
                 val entry = runCatching { resources.getResourceEntryName(item.itemId) }.getOrNull()
                 val iconRes = if (entry != null) resId("ic_$entry", "drawable") else 0
                 add(
-                    GlassTab(
-                        menuId = item.itemId,
+                    LiquidGlassTab(
+                        routeId = item.itemId,
                         iconRes = if (iconRes != 0) iconRes else android.R.drawable.ic_menu_help,
                         label = item.title?.toString().orEmpty()
                     )
@@ -199,7 +195,6 @@ class MainActivity : BottomNavigationBlueprintActivity() {
             }
         }
 
-        // Add the Compose liquid-glass bar pinned to the bottom, above everything else.
         val composeView = ComposeView(this).apply {
             layoutParams = CoordinatorLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
@@ -207,8 +202,8 @@ class MainActivity : BottomNavigationBlueprintActivity() {
             setContent {
                 LiquidGlassBottomBar(
                     tabs = tabs,
-                    selectedId = selectedId.intValue,
-                    onSelect = { menuId -> onGlassTabSelected(menuId) },
+                    selectedRouteId = selectedId.intValue,
+                    onRouteSelected = { menuId -> onLiquidTabSelected(menuId) },
                     backdropState = backdropState,
                     onInteraction = { scheduleInteractionCaptures() }
                 )
@@ -221,13 +216,12 @@ class MainActivity : BottomNavigationBlueprintActivity() {
         handler.post { applyBottomContentInset(root) }
     }
 
-    private fun onGlassTabSelected(menuId: Int) {
+    private fun onLiquidTabSelected(menuId: Int) {
         val nav = bottomNav ?: return
         if (nav.selectedItemId != menuId) {
-            nav.selectedItemId = menuId // triggers Blueprint's fragment swap
+            nav.selectedItemId = menuId
         }
         selectedId.intValue = menuId
-        // Refresh the refraction after the fragment settles.
         scheduleCaptures()
     }
 
@@ -285,7 +279,7 @@ class MainActivity : BottomNavigationBlueprintActivity() {
         scheduleChromeSync()
         // Keep the stock bar hidden and the selection mirror in sync.
         bottomNav?.let {
-            it.visibility = View.INVISIBLE
+            it.visibility = View.GONE
             selectedId.intValue = it.selectedItemId
         }
         handler.post { captureBackdrop() }

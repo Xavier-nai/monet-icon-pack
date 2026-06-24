@@ -37,7 +37,6 @@ android {
         setProperty("archivesBaseName", applicationId + "-" + versionName)
         vectorDrawables.useSupportLibrary = true
         proguardFiles 'proguard-android-optimize.txt', 'proguard-rules.pro'
-        consumerProguardFiles 'proguard-android-optimize.txt', 'proguard-rules.pro'
 
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
@@ -67,7 +66,6 @@ android {
             minifyEnabled true
             shrinkResources false
             proguardFiles 'proguard-android-optimize.txt', 'proguard-rules.pro'
-            consumerProguardFiles 'proguard-android-optimize.txt', 'proguard-rules.pro'
             if (keystorePropsFile.exists()) {
                 signingConfig signingConfigs.release
             }
